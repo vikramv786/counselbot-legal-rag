@@ -74,13 +74,31 @@ npm.cmd run build
 
 ## Dataset and Local Storage
 
-CounselBot uses a fictional legal dataset containing documents, contract records, and litigation records.
+CounselBot uses the fictional **Veridian Legal Hub** dataset.
 
-The local synthetic dataset, SQLite database, and Qdrant index are currently excluded from Git.
+The Git repository includes:
 
-A fresh clone therefore requires these data resources to be supplied or recreated before the full RAG application can answer questions.
+- 19 synthetic legal documents in `veridian_legal_dataset/documents/`
+- Document metadata and access permissions in `veridian_legal_dataset/manifest.json`
+- A synthetic SQLite database at `veridian_legal_dataset/veridian_legal.db`
+- Password-free demo-user test fixtures in `tests/users_seed_public.json`
 
-Dataset preparation and reproducibility instructions will be documented separately.
+The original `veridian_legal_dataset/users_seed.json` file is excluded from Git because it contains demo passwords.
+
+The generated Qdrant vector index (`data/qdrant/`) is also excluded from Git. It must be rebuilt after cloning the repository.
+
+### Build the Qdrant Vector Index
+
+From the project root, after installing the Python dependencies, run:
+
+```powershell
+$env:PYTHONPATH = "src"
+uv run --no-sync python -m counselbot_legal_rag.ingestion
+```
+
+The ingestion pipeline uses Docling and HybridChunker to process the documents, creates dense and sparse BM25 embeddings, and stores the chunks and access-control metadata in Qdrant.
+
+Run ingestion before starting the FastAPI backend. Model downloads and document processing may take several minutes on the first run.
 
 ## Running CounselBot Locally
 
@@ -90,7 +108,7 @@ Dataset preparation and reproducibility instructions will be documented separate
 - `uv` Python package manager
 - Node.js and npm
 - A Groq API key
-- The prepared fictional Veridian Legal Hub dataset, SQLite database, and Qdrant index
+- The Qdrant index generated using the ingestion instructions above
 
 ### 1. Install Backend Dependencies
 
@@ -157,7 +175,7 @@ Example questions:
 
 Responses depend on the selected demo user's access permissions.
 
-**Note:** The application requires the local dataset, SQLite database, and Qdrant index to be present. These resources are not currently included in the Git repository, so the startup instructions alone are not sufficient for a fresh clone.
+**Note:** The fictional documents and SQLite database are included in this repository. Before starting the backend on a fresh clone, install the Python dependencies and run the ingestion command above to build the local Qdrant index.
 
 ## Project Status
 
