@@ -1,0 +1,35 @@
+[project]
+name = "counselbot-legal-rag"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Vikram", email = "vikramv786@yahoo.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "docling>=2.151.1",
+    "fastapi>=0.165.0",
+    "fastembed>=0.9.1",
+    "groq>=1.7.0",
+    "qdrant-client>=1.20.0",
+    "sentence-transformers>=6.3.0",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+counselbot-legal-rag = "counselbot_legal_rag:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# CounselBot local dataset
+veridian_legal_dataset/
+
+# Environment secrets
+.env
+.env.*
+
+# Local databases
+*.db
+
+
+# Local Qdrant database and generated data
+data/qdrant/
