@@ -9,15 +9,21 @@ wheels/
 # Virtual environments
 .venv
 
-# CounselBot local dataset
-veridian_legal_dataset/
+# Fictional assignment dataset
+# Keep the original demo-password file private
+veridian_legal_dataset/users_seed.json
+
 
 # Environment secrets
 .env
 .env.*
 
+
 # Local databases
 *.db
+
+# Allow the fictional assignment SQLite database
+!veridian_legal_dataset/veridian_legal.db
 
 
 # Local Qdrant database and generated data

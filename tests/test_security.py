@@ -7,7 +7,7 @@ from counselbot_legal_rag.security import can_access_document
 
 DATASET_DIR = Path(__file__).resolve().parents[1] / "veridian_legal_dataset"
 
-users = json.loads((DATASET_DIR / "users_seed.json").read_text())
+users = json.loads((Path(__file__).resolve().parent / "users_seed_public.json").read_text())
 documents = json.loads((DATASET_DIR / "manifest.json").read_text())
 
 

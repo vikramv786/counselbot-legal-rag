@@ -1,0 +1,65 @@
+[
+  {
+    "username": "gc.sharma",
+    "display_name": "General Counsel",
+    "role": "general_counsel",
+    "matters": [
+      "*"
+    ]
+  },
+  {
+    "username": "adv.rao",
+    "display_name": "Corporate Counsel (Falcon deal team)",
+    "role": "corporate_counsel",
+    "matters": [
+      "MTR-017"
+    ]
+  },
+  {
+    "username": "adv.nair",
+    "display_name": "Corporate Counsel (Meridian team)",
+    "role": "corporate_counsel",
+    "matters": [
+      "MTR-031"
+    ]
+  },
+  {
+    "username": "adv.khan",
+    "display_name": "Litigation Counsel (Meridian + NovaGen)",
+    "role": "litigation_counsel",
+    "matters": [
+      "MTR-031",
+      "MTR-044"
+    ]
+  },
+  {
+    "username": "adv.iyer",
+    "display_name": "Litigation Counsel (NovaGen only)",
+    "role": "litigation_counsel",
+    "matters": [
+      "MTR-044"
+    ]
+  },
+  {
+    "username": "comp.deshpande",
+    "display_name": "Compliance Officer (Harbor team)",
+    "role": "compliance_officer",
+    "matters": [
+      "MTR-023"
+    ]
+  },
+  {
+    "username": "comp.bose",
+    "display_name": "Compliance Officer (no matters)",
+    "role": "compliance_officer",
+    "matters": []
+  },
+  {
+    "username": "para.sneha",
+    "display_name": "Paralegal (assigned to Falcon)",
+    "role": "paralegal",
+    "matters": [
+      "MTR-017"
+    ]
+  }
+]
