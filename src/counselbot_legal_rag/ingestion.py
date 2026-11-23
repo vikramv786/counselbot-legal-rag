@@ -85,7 +85,13 @@ def main():
                 for item in (chunk.meta.doc_items or [])
                 if item.label is not None
             ]
-            chunk_type = item_labels[0] if item_labels else "text"
+            raw_type = item_labels[0].lower() if item_labels else "text"
+            chunk_type = (
+                "table" if "table" in raw_type else
+                "code" if "code" in raw_type else
+                "heading" if "heading" in raw_type or "title" in raw_type else
+                "text"
+            )
 
             chunk_record = {
 

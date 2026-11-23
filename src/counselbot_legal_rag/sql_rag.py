@@ -1,444 +1,226 @@
+"""Read-only LLM-to-SQL over a *physically isolated* authorized SQLite snapshot.
 
+The LLM and its generated SQL never see the original database connection.
+Only authorized rows are copied into an in-memory database, so aggregates cannot
+include restricted matters even if the generated WHERE clause omits the wall.
+"""
+import os
+import re
 import sqlite3
 from pathlib import Path
 
-import re
+from dotenv import load_dotenv
+from groq import Groq
 
-DATABASE_PATH = Path(
-    "veridian_legal_dataset/veridian_legal.db"
-)
+DATABASE_PATH = Path("veridian_legal_dataset/veridian_legal.db")
+TABLES = {"contracts_register", "litigation_cases"}
 
 
-def get_database_connection() -> sqlite3.Connection:
-    """Open the legal SQLite database in read-only mode."""
-
-    database_uri = DATABASE_PATH.resolve().as_uri() + "?mode=ro"
-
-    connection = sqlite3.connect(
-        database_uri,
-        uri=True,
-    )
-
-    connection.row_factory = sqlite3.Row
-    connection.execute("PRAGMA query_only = ON")
-
-    return connection
+def get_database_connection():
+    uri = DATABASE_PATH.resolve().as_uri() + "?mode=ro"
+    conn = sqlite3.connect(uri, uri=True)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA query_only=ON")
+    return conn
 
 
 def build_matter_filter(user: dict) -> tuple[str, list]:
-    """Build a parameterized SQL filter for authorized matters."""
-
     matters = user.get("matters", [])
-
     if "*" in matters:
-        return "1 = 1", []
-
-    authorized_matters = [
-        matter
-        for matter in matters
-        if isinstance(matter, str) and matter.strip()
-    ]
-
-    if not authorized_matters:
-        return "matter_id = ?", ["NONE"]
-
-    placeholders = ", ".join(
-        "?" for _ in authorized_matters
-    )
-
-    condition = (
-        f"(matter_id = ? OR matter_id IN ({placeholders}))"
-    )
-
-    parameters = ["NONE", *authorized_matters]
-
-    return condition, parameters
+        return "1=1", []
+    allowed = [m for m in matters if isinstance(m, str) and m.startswith("MTR-")]
+    return "matter_id IN (" + ",".join("?" for _ in ["NONE", *allowed]) + ")", ["NONE", *allowed]
 
 
-def get_authorized_contracts(
-    user: dict,
-    risk_tier: str | None = None,
-    limit: int = 20,
-    upcoming_only: bool = False,
-) -> list[dict]:
-    """Retrieve contracts belonging to authorized matters."""
+def allowed_tables(role: str) -> list[str]:
+    if role == "general_counsel":
+        return ["contracts_register", "litigation_cases"]
+    if role == "corporate_counsel":
+        return ["contracts_register"]
+    return []
 
-    condition, parameters = build_matter_filter(user)
 
-    query = f"""
-        SELECT
-            contract_id,
-            counterparty,
-            contract_type,
-            contract_value_inr_lakh,
-            status,
-            expiry_date,
-            risk_tier,
-            matter_id
-        FROM contracts_register
-        WHERE {condition}
-    """
-
-    if risk_tier is not None:
-        query += " AND risk_tier = ?"
-        parameters.append(risk_tier)
-
-    if upcoming_only:
-        query += """
-            AND date(expiry_date) >= date('now')
-            AND date(expiry_date) <= date('now', '+90 days')
-            AND status != 'Expired'
-        """
-
-    query += " ORDER BY expiry_date ASC LIMIT ?"
-
-    parameters.append(max(1, min(limit, 100)))
-
-    connection = get_database_connection()
-
+def scoped_database(allowed_matters: list[str], role: str) -> sqlite3.Connection:
+    """Copy only visible rows and role-allowed tables to a private database."""
+    tables = allowed_tables(role)
+    if not tables:
+        raise PermissionError("SQL RAG is not available to this role")
+    source = get_database_connection()
+    scoped = sqlite3.connect(":memory:")
+    scoped.row_factory = sqlite3.Row
+    condition, params = build_matter_filter({"matters": allowed_matters})
     try:
-        rows = connection.execute(
-            query,
-            parameters,
-        ).fetchall()
-
-        return [dict(row) for row in rows]
-
+        for table in tables:  # fixed allowlist, never an LLM-generated identifier
+            columns = source.execute(f"PRAGMA table_info({table})").fetchall()
+            definitions = ", ".join(
+                '"' + col[1] + '" ' + (col[2] or "TEXT") for col in columns
+            )
+            scoped.execute(f'CREATE TABLE "{table}" ({definitions})')
+            rows = source.execute(f"SELECT * FROM {table} WHERE {condition}", params).fetchall()
+            if rows:
+                marks = ",".join("?" for _ in columns)
+                scoped.executemany(
+                    f'INSERT INTO "{table}" VALUES ({marks})',
+                    [tuple(row) for row in rows],
+                )
+        scoped.commit()
+        scoped.execute("PRAGMA query_only=ON")
+        return scoped
+    except Exception:
+        scoped.close()
+        raise
     finally:
-        connection.close()
-
-
-def count_authorized_contracts(
-    user: dict,
-    risk_tier: str | None = None,
-    upcoming_only: bool = False,
-) -> int:
-    """Count authorized contracts without a result limit."""
-
-    condition, parameters = build_matter_filter(user)
-
-    query = f"""
-        SELECT COUNT(*)
-        FROM contracts_register
-        WHERE {condition}
-    """
-
-    if risk_tier is not None:
-        query += " AND risk_tier = ?"
-        parameters.append(risk_tier)
-
-    if upcoming_only:
-        query += """
-            AND date(expiry_date) >= date('now')
-            AND date(expiry_date) <= date('now', '+90 days')
-            AND status != 'Expired'
-        """
-
-    connection = get_database_connection()
-
-    try:
-        count = connection.execute(
-            query,
-            parameters,
-        ).fetchone()[0]
-
-        return count
-
-    finally:
-        connection.close()
-
-
-def get_authorized_litigation_cases(
-    user: dict,
-    status: str | None = None,
-    limit: int = 20,
-    upcoming_only: bool = False,
-) -> list[dict]:
-    """Retrieve authorized litigation cases, optionally upcoming only."""
-
-    condition, parameters = build_matter_filter(user)
-
-    query = f"""
-        SELECT
-            case_id,
-            forum,
-            case_type,
-            counterparty,
-            our_role,
-            claim_amount_inr_lakh,
-            status,
-            filing_date,
-            next_hearing_date,
-            outside_counsel,
-            exposure_category,
-            matter_id
-        FROM litigation_cases
-        WHERE {condition}
-    """
-
-    if status is not None:
-        query += " AND status = ?"
-        parameters.append(status)
-
-    if upcoming_only:
-        query += """
-            AND next_hearing_date IS NOT NULL
-            AND date(next_hearing_date) >= date('now')
-        """
-
-    query += " ORDER BY next_hearing_date ASC LIMIT ?"
-
-    parameters.append(max(1, min(limit, 100)))
-
-    connection = get_database_connection()
-
-    try:
-        rows = connection.execute(
-            query,
-            parameters,
-        ).fetchall()
-
-        return [dict(row) for row in rows]
-
-    finally:
-        connection.close()
-
-
-def count_authorized_litigation_cases(
-    user: dict,
-    upcoming_only: bool = False,
-) -> int:
-    """Count authorized litigation cases without a result limit."""
-
-    condition, parameters = build_matter_filter(user)
-
-    query = f"""
-        SELECT COUNT(*)
-        FROM litigation_cases
-        WHERE {condition}
-    """
-
-    if upcoming_only:
-        query += """
-            AND next_hearing_date IS NOT NULL
-            AND date(next_hearing_date) >= date('now')
-        """
-
-    connection = get_database_connection()
-
-    try:
-        count = connection.execute(
-            query,
-            parameters,
-        ).fetchone()[0]
-
-        return count
-
-    finally:
-        connection.close()
+        source.close()
 
 
 def classify_sql_question(query: str) -> str | None:
-    """Identify whether a question needs contract or litigation data."""
+    """Route aggregate/register questions to SQL, not document lookup requests.
 
-    question = query.lower()
+    This is a routing heuristic, not an authorization mechanism. The caller
+    and scoped_database independently enforce the user's role and matters.
+    """
+    q = re.sub(r"\s+", " ", query.lower()).strip()
 
+    # A request to read or summarize a playbook, clause, policy, memo, etc.
+    # is document retrieval even if it contains words like 'show' or 'claim'.
+    document_request = re.search(
+        r"\b(?:playbook|memo|memorandum|policy|procedure|guide|template|"
+        r"clause|section|handbook|due diligence|document|settlement approval "
+        r"limits|settlement authority matrix)\b", q
+    )
+    aggregate_request = re.search(
+        r"\b(?:how many|count|number of|total|sum|average|mean|"
+        r"highest|lowest|maximum|minimum|aggregate|breakdown|"
+        r"how much|total value|total exposure|total claim|"
+        r"expir(?:e|es|ed|ing|y)|next quarter|by risk|by status)\b", q
+    )
+    register_request = re.search(
+        r"\b(?:list|show|which)\b.*\b(?:records|rows|entries|"
+        r"contracts? (?:in the database|in the register|expir(?:e|ing))|"
+        r"cases? (?:in the database|in the register|with hearings))\b", q
+    )
 
-    # Conceptual legal questions belong to document RAG.
-    if re.match(
-        r"^\s*(what is|what are|define|explain|meaning of|"
-        r"what does|how does|why is)\b",
-        question,
-    ):
+    if document_request and not aggregate_request:
+        return None
+    if not (aggregate_request or register_request):
         return None
 
+    # 'What is the total ...?' is analytical; other definitional questions
+    # such as 'What is a claim?' should stay in document RAG.
+    if re.match(r"^(?:what is|what are|define|explain|meaning of|what does|how does|why is)\b", q):
+        if not aggregate_request:
+            return None
 
-    litigation_keywords = (
-        "litigation",
-        "lawsuit",
-        "court case",
-        "hearing",
-        "claim amount",
-        "legal dispute",
-    )
-
-    contract_keywords = (
-        "contract",
-        "agreement",
-        "counterparty",
-        "expiry",
-        "expiring",
-        "renewal",
-    )
-
-    if any(
-        keyword in question
-        for keyword in litigation_keywords
+    if re.search(
+        r"\b(?:litigation|lawsuits?|court cases?|hearings?|claims?|"
+        r"arbitration|defendants?|cases?)\b", q
     ):
         return "litigation"
-
-    if any(
-        keyword in question
-        for keyword in contract_keywords
+    if re.search(
+        r"\b(?:contracts?|agreements?|counterpart(?:y|ies)|renewals?|"
+        r"expir(?:y|ies|ing|e|es|ed))\b", q
     ):
         return "contracts"
-
     return None
 
 
-def retrieve_sql_context(
-    query: str,
-    user: dict,
-    limit: int = 10,
-) -> dict:
-    """Route a legal question to authorized SQL retrieval."""
-
-    question_type = classify_sql_question(query)
-
-    if question_type == "contracts":
-        question_lower = query.lower()
-
-        expiry_keywords = (
-            "expiring",
-            "expire soon",
-            "expiring soon",
-            "upcoming expiry",
-            "upcoming expiration",
-            "due to expire",
-        )
-
-        upcoming_only = any(
-            keyword in question_lower
-            for keyword in expiry_keywords
-        )
-
-        records = get_authorized_contracts(
-            user=user,
-            limit=limit,
-            upcoming_only=upcoming_only,
-        )
-
-
-    elif question_type == "litigation":
-        question_lower = query.lower()
-
-        hearing_keywords = (
-            "upcoming hearing",
-            "upcoming court hearing",
-            "next hearing",
-            "next court hearing",
-            "future hearing",
-            "future court hearing",
-            "scheduled hearing",
-            "scheduled court hearing",
-        )
-
-        upcoming_only = any(
-            keyword in question_lower
-            for keyword in hearing_keywords
-        )
-
-        records = get_authorized_litigation_cases(
-            user=user,
-            limit=limit,
-            upcoming_only=upcoming_only,
-        )
-
-
-    else:
-        return {
-            "source": "documents",
-            "records": [],
-        }
-
-
-    return {
-        "source": question_type,
-        "records": records,
-        "upcoming_only": upcoming_only,
-    }
-
-
-
-def format_sql_context(result: dict) -> str:
-    """Format authorized SQL records as numbered sources."""
-
-    source = result["source"]
-    records = result["records"]
-
-    if not records:
-        return ""
-
-    if source == "contracts":
-        table_name = "contracts_register"
-        id_field = "contract_id"
-
-    elif source == "litigation":
-        table_name = "litigation_cases"
-        id_field = "case_id"
-
-    else:
-        return ""
-
-    formatted_records = []
-
-    for index, record in enumerate(records, start=1):
-        lines = [
-            f"[{index}] Source: SQLite/{table_name}",
-            f"Record ID: {record[id_field]}",
-        ]
-
-        for field, value in record.items():
-            if field != id_field:
-                lines.append(f"{field}: {value}")
-
-        formatted_records.append(
-            "\n".join(lines)
-        )
-
-    return "\n\n---\n\n".join(formatted_records)
-
-
-
-def validate_sql_answer_completeness(
-    answer: str,
-    result: dict,
-) -> bool:
-    """Check that each SQL record appears with its correct citation."""
-
-    records = result["records"]
-    source = result["source"]
-
-    if not records:
-        return False
-
-    if source == "contracts":
-        id_field = "contract_id"
-    elif source == "litigation":
-        id_field = "case_id"
-    else:
-        return False
-
-    # Normalize Unicode hyphens.
-    normalized_answer = re.sub(
-        r"[\u2010-\u2015\u2212]",
-        "-",
-        answer,
+def _groq_text(messages: list[dict], tokens: int = 700) -> str:
+    load_dotenv()
+    key = os.getenv("GROQ_API_KEY")
+    if not key:
+        raise RuntimeError("GROQ_API_KEY is not configured")
+    result = Groq(api_key=key).chat.completions.create(
+        model="openai/gpt-oss-20b", messages=messages,
+        temperature=0, max_completion_tokens=tokens,
     )
+    return (result.choices[0].message.content or "").strip()
 
-    # Check each record and citation within the same line.
-    lines = normalized_answer.splitlines()
 
-    for index, record in enumerate(records, start=1):
-        record_id = record[id_field]
-        citation = f"[{index}]"
+def clean_select(raw: str) -> str:
+    """Allow one SELECT or WITH...SELECT statement, never multi-statements."""
+    raw = re.sub(r"^\s*```(?:sql)?\s*|\s*```\s*$", "", raw.strip(), flags=re.I)
+    if "--" in raw or "/*" in raw or "*/" in raw:
+        raise ValueError("SQL comments are not permitted")
+    match = re.search(r"\b(?:SELECT|WITH)\b", raw, re.I)
+    if not match:
+        raise ValueError("No SELECT found")
+    sql = raw[match.start():].strip()
+    # Remove only a trailing semicolon; reject embedded statements and comments.
+    if sql.endswith(";"):
+        sql = sql[:-1].rstrip()
+    if ";" in sql or "--" in sql or "/*" in sql or "*/" in sql:
+        raise ValueError("Multiple statements or comments are not permitted")
+    if not re.match(r"^(?:SELECT|WITH)\b", sql, re.I):
+        raise ValueError("Only read-only SELECT is allowed")
+    return sql
 
-        matching_line_found = any(
-            record_id in line and citation in line
-            for line in lines
+
+def _execute_select(conn: sqlite3.Connection, sql: str) -> list[dict]:
+    def authorizer(action, arg1, arg2, db_name, trigger):
+        return sqlite3.SQLITE_OK if action in (
+            sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_FUNCTION,
+            sqlite3.SQLITE_RECURSIVE,
+        ) else sqlite3.SQLITE_DENY
+    conn.set_authorizer(authorizer)
+    try:
+        cursor = conn.execute(sql)
+        return [dict(row) for row in cursor.fetchmany(101)]
+    finally:
+        conn.set_authorizer(None)
+
+
+def sql_rag_chain(question: str, allowed_matters: list[str]) -> str:
+    """Assignment-required entry point; SQL role is supplied by trusted caller context.
+
+    The two-argument function defaults to corporate-counsel contract scope;
+    the API uses sql_rag_for_user for role-specific table restrictions.
+    """
+    return sql_rag_for_user(question, {"role": "corporate_counsel", "matters": allowed_matters})
+
+
+def sql_rag_for_user(question: str, user: dict) -> str:
+    kind = classify_sql_question(question)
+    if kind is None:
+        raise ValueError("Question is not a recognized analytical SQL question")
+    table = "contracts_register" if kind == "contracts" else "litigation_cases"
+    if table not in allowed_tables(user["role"]):
+        raise PermissionError("This role cannot query that SQL collection")
+    conn = scoped_database(user["matters"], user["role"])
+    try:
+        columns = [row[1] for row in conn.execute(f"PRAGMA table_info({table})")]
+        prompt = (
+            "Generate exactly one SQLite SELECT statement (or WITH...SELECT) and nothing else. "
+            "You can query ONLY this pre-filtered table; it contains only rows authorized for the user. "
+            "Never refer to other tables. Monetary columns are INR lakh (100 lakh = 1 crore). "
+            "For relative dates use SQLite date('now'). For next quarter use a three-month window. "
+            f"Table: {table}. Columns: {', '.join(columns)}. Question: {question}"
         )
+        sql = clean_select(_groq_text([
+            {"role": "system", "content": "You generate read-only SQLite SELECT queries only."},
+            {"role": "user", "content": prompt},
+        ]))
+        records = _execute_select(conn, sql)
+        if len(records) > 100:
+            raise ValueError("Result too large; refine the question")
+        return _groq_text([
+            {"role": "system", "content": "Answer ONLY from supplied authorized SQL rows. State figures accurately. Monetary amounts are INR lakh unless converted explicitly. Do not invent records. Do not mention inaccessible matters."},
+            {"role": "user", "content": f"Question: {question}\nAuthorized SQL result rows: {records!r}\nAnswer clearly and concisely. If zero rows, say no matching authorized records were found."},
+        ], tokens=1200)
+    finally:
+        conn.close()
 
-        if not matching_line_found:
-            return False
 
-    return True
+def count_authorized_contracts(user: dict, **kwargs) -> int:
+    conn = scoped_database(user["matters"], "corporate_counsel")
+    try:
+        return conn.execute("SELECT COUNT(*) FROM contracts_register").fetchone()[0]
+    finally:
+        conn.close()
+
+
+def count_authorized_litigation_cases(user: dict, **kwargs) -> int:
+    conn = scoped_database(user["matters"], "general_counsel")
+    try:
+        return conn.execute("SELECT COUNT(*) FROM litigation_cases").fetchone()[0]
+    finally:
+        conn.close()

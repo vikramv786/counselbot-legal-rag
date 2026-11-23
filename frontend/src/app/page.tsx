@@ -33,6 +33,7 @@ type UserProfile = {
   username: string;
   role: string;
   matters: string[];
+  collections: string[];
 };
 
 const DEMO_USERS: { username: DemoUsername; label: string }[] = [
@@ -340,6 +341,10 @@ export default function Home() {
 
               <span className="rounded-full bg-slate-800 px-3 py-1 text-sm">
                 Role: {formatLabel(profile.role)}
+              </span>
+
+              <span className="rounded-full bg-slate-800 px-3 py-1 text-sm">
+                Collections: {profile.collections.join(", ")}
               </span>
 
               <span className="rounded-full bg-slate-800 px-3 py-1 text-sm">

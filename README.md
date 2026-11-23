@@ -170,7 +170,7 @@ The `/chat` endpoint does not accept a user-supplied role or matter list.
 | `comp.bose` | Compliance officer | No assigned matters |
 | `para.sneha` | Paralegal | `MTR-017` |
 
-Demo passwords are not published in this README.
+**Local demo credentials:** All eight fictional accounts use the password `demo@123` by default (`DEMO_PASSWORD` may override it). Set `JWT_SECRET_KEY` in `.env` to a long random value before starting FastAPI.
 
 ### 5.2 Role-to-collection permissions
 
@@ -202,10 +202,10 @@ An unauthorized request receives a generic response:
 
 ```json
 {
-  "answer": "I cannot provide information for the requested matter under your current access permissions.",
+  "answer": "I couldn't find anything relevant in the documents or records you are authorised to access.",
   "sources": [],
   "retrieval_type": "hybrid_rag",
-  "access_status": "role_restricted"
+  "access_status": "no_accessible_results"
 }
 ```
 
@@ -268,6 +268,8 @@ Create a `.env` file in the project root:
 
 ```dotenv
 GROQ_API_KEY=your_groq_api_key_here
+JWT_SECRET_KEY=replace_with_a_long_random_secret
+DEMO_PASSWORD=demo@123
 ```
 
 JWT signing configuration and local demo credentials must also be configured according to `src/counselbot_legal_rag/auth.py` and the project's local credential setup.
@@ -573,3 +575,20 @@ The completed local implementation includes:
 - Six adversarial security test screenshots
 
 **CounselBot demonstrates an access-controlled legal RAG workflow using synthetic legal information for AI engineering education.**
+
+## Assignment compliance notes (final revision)
+
+- SQL RAG now generates a single SELECT with Groq, cleans it, executes it against a read-only in-memory copy of **only authorized rows and role-allowed tables**, then uses Groq to explain the results. The required two-argument `sql_rag_chain(question, allowed_matters)` is available for corporate contract questions; the authenticated API calls `sql_rag_for_user` to enforce role-specific table access.
+- Explicit matter-wall refusals return `no_accessible_results` and a neutral message. Role-based refusals return `role_restricted` and identify permitted collections.
+- **Tool substitutions:** None for the mandated core tools: Docling/HybridChunker, Qdrant dense+BM25, cross-encoder, Groq, FastAPI, Next.js, SQLite. For stronger SQL isolation, an in-memory authorized SQLite snapshot is used instead of scoped SQL views; this is an equivalent pre-filtering mechanism.
+- **Evidence:** See `docs/screenshots/` for the original six screenshots. The original screenshots predate the corrected neutral matter-wall status. Capture updated role/matter/SQL comparison screenshots before submitting.
+- **Evaluation caution:** The earlier five-question CSV demonstrates functionality, not a measured quality improvement. The additional exact-identifier evaluation script provides manually auditable rankings and metrics; results must be generated against the local Qdrant index before claiming a relevance improvement.
+
+### Required evidence to capture after updating
+
+1. Role blocks: `para.sneha` / settlement authority; `comp.bose` / contract negotiation playbook; `adv.iyer` / contract SQL count.
+2. Matter wall: `adv.nair` and `adv.rao` both ask "Summarize Project Falcon due diligence"; capture each response.
+3. SQL aggregate: `adv.rao` and `adv.nair` both ask "How many contracts are in the database?"; capture both counts and verify they differ.
+4. Run `uv run --no-sync python tests/evaluate_exact_identifiers.py` and include the generated CSV and actual MRR@5/Hit@5 results in the final submission.
+
+The six older screenshots are historical evidence only and do not by themselves satisfy the required test distribution.
