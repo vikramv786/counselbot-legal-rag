@@ -1,0 +1,76 @@
+question_number,question,username,method,rank,document,section,matter,collection,chunk_id,retrieval_score,elapsed_ms
+1,What is a non-disclosure agreement?,gc.sharma,dense,1,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,0.572193,32.07
+1,What is a non-disclosure agreement?,gc.sharma,dense,2,NDA_Clause_Library.md,NDA Clause Library,NONE,contracts,VLH-CON-003,0.562092,32.07
+1,What is a non-disclosure agreement?,gc.sharma,dense,3,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.518822,32.07
+1,What is a non-disclosure agreement?,gc.sharma,dense,4,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.488143,32.07
+1,What is a non-disclosure agreement?,gc.sharma,dense,5,NDA_Clause_Library.md,1. Definition of Confidential Information,NONE,contracts,VLH-CON-003,0.478707,32.07
+1,What is a non-disclosure agreement?,gc.sharma,hybrid,1,NDA_Clause_Library.md,NDA Clause Library,NONE,contracts,VLH-CON-003,0.833333,613.95
+1,What is a non-disclosure agreement?,gc.sharma,hybrid,2,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,0.75,613.95
+1,What is a non-disclosure agreement?,gc.sharma,hybrid,3,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.340909,613.95
+1,What is a non-disclosure agreement?,gc.sharma,hybrid,4,Vendor_MSA_Template.pdf,5. Term and Renewal,NONE,contracts,VLH-CON-002,0.333333,613.95
+1,What is a non-disclosure agreement?,gc.sharma,hybrid,5,Patent_and_Invention_Disclosure_Process.pdf,1. Invention Disclosure,NONE,ip,VLH-IP-002,0.266667,613.95
+1,What is a non-disclosure agreement?,gc.sharma,hybrid_reranked,1,NDA_Clause_Library.md,NDA Clause Library,NONE,contracts,VLH-CON-003,0.833333,701.72
+1,What is a non-disclosure agreement?,gc.sharma,hybrid_reranked,2,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,0.75,701.72
+1,What is a non-disclosure agreement?,gc.sharma,hybrid_reranked,3,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.2625,701.72
+1,What is a non-disclosure agreement?,gc.sharma,hybrid_reranked,4,Vendor_MSA_Template.pdf,1. Definitions,NONE,contracts,VLH-CON-002,0.125,701.72
+1,What is a non-disclosure agreement?,gc.sharma,hybrid_reranked,5,Code_of_Business_Conduct.pdf,2. Conflicts of Interest,NONE,general,VLH-GEN-002,0.201681,701.72
+2,What are the standard exclusions from confidentiality?,gc.sharma,dense,1,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,0.680107,15.19
+2,What are the standard exclusions from confidentiality?,gc.sharma,dense,2,NDA_Clause_Library.md,1. Definition of Confidential Information,NONE,contracts,VLH-CON-003,0.50004,15.19
+2,What are the standard exclusions from confidentiality?,gc.sharma,dense,3,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.487603,15.19
+2,What are the standard exclusions from confidentiality?,gc.sharma,dense,4,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.458107,15.19
+2,What are the standard exclusions from confidentiality?,gc.sharma,dense,5,Patent_and_Invention_Disclosure_Process.pdf,6. Trade Secrets,NONE,ip,VLH-IP-002,0.418832,15.19
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid,1,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,1.0,567.93
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid,2,NDA_Clause_Library.md,1. Definition of Confidential Information,NONE,contracts,VLH-CON-003,0.433333,567.93
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid,3,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.340909,567.93
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid,4,Contract_Review_Playbook.pdf,4.3 Governing Law and Disputes,NONE,contracts,VLH-CON-001,0.333333,567.93
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid,5,General_Legal_FAQs.md,Do I need an NDA before sharing information with a vendor?,NONE,general,VLH-GEN-004,0.25,567.93
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid_reranked,1,NDA_Clause_Library.md,2. Standard Exclusions,NONE,contracts,VLH-CON-003,1.0,705.02
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid_reranked,2,Contract_Review_Playbook.pdf,4.1 Limitation of Liability,NONE,contracts,VLH-CON-001,0.2,705.02
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid_reranked,3,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.340909,705.02
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid_reranked,4,Legal_Department_Handbook.pdf,4. Privilege and Confidentiality,NONE,general,VLH-GEN-001,0.18254,705.02
+2,What are the standard exclusions from confidentiality?,gc.sharma,hybrid_reranked,5,General_Legal_FAQs.md,"What does ""privileged"" mean?",NONE,general,VLH-GEN-004,0.174242,705.02
+3,What obligations apply to vendor confidentiality?,gc.sharma,dense,1,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.53622,24.15
+3,What obligations apply to vendor confidentiality?,gc.sharma,dense,2,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.528434,24.15
+3,What obligations apply to vendor confidentiality?,gc.sharma,dense,3,Contract_Review_Playbook.pdf,4.2 Indemnities,NONE,contracts,VLH-CON-001,0.516812,24.15
+3,What obligations apply to vendor confidentiality?,gc.sharma,dense,4,NDA_Clause_Library.md,1. Definition of Confidential Information,NONE,contracts,VLH-CON-003,0.497928,24.15
+3,What obligations apply to vendor confidentiality?,gc.sharma,dense,5,General_Legal_FAQs.md,Do I need an NDA before sharing information with a vendor?,NONE,general,VLH-GEN-004,0.495401,24.15
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid,1,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.833333,570.81
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid,2,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.833333,570.81
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid,3,General_Legal_FAQs.md,Do I need an NDA before sharing information with a vendor?,NONE,general,VLH-GEN-004,0.333333,570.81
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid,4,Contract_Review_Playbook.pdf,4.2 Indemnities,NONE,contracts,VLH-CON-001,0.3125,570.81
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid,5,NDA_Clause_Library.md,1. Definition of Confidential Information,NONE,contracts,VLH-CON-003,0.266667,570.81
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid_reranked,1,NDA_Clause_Library.md,3. Term of Obligations,NONE,contracts,VLH-CON-003,0.833333,684.53
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid_reranked,2,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.833333,684.53
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid_reranked,3,Vendor_MSA_Template.pdf,10. Warranties,NONE,contracts,VLH-CON-002,0.183824,684.53
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid_reranked,4,Contract_Review_Playbook.pdf,4.2 Indemnities,NONE,contracts,VLH-CON-001,0.3125,684.53
+3,What obligations apply to vendor confidentiality?,gc.sharma,hybrid_reranked,5,Vendor_MSA_Template.pdf,11. Indemnification,NONE,contracts,VLH-CON-002,0.090909,684.53
+4,What are the key intellectual property ownership provisions?,gc.sharma,dense,1,Vendor_MSA_Template.pdf,9. Intellectual Property,NONE,contracts,VLH-CON-002,0.491521,20.11
+4,What are the key intellectual property ownership provisions?,gc.sharma,dense,2,Legal_Department_Handbook.pdf,1.1 Teams and Responsibilities,NONE,general,VLH-GEN-001,0.431341,20.11
+4,What are the key intellectual property ownership provisions?,gc.sharma,dense,3,Patent_and_Invention_Disclosure_Process.pdf,6. Trade Secrets,NONE,ip,VLH-IP-002,0.420848,20.11
+4,What are the key intellectual property ownership provisions?,gc.sharma,dense,4,Settlement_Authority_Matrix.pdf,2. Special Rules,NONE,litigation,VLH-LIT-003,0.412397,20.11
+4,What are the key intellectual property ownership provisions?,gc.sharma,dense,5,Patent_and_Invention_Disclosure_Process.pdf,Patent Filing and Invention Disclosure Process,NONE,ip,VLH-IP-002,0.41082,20.11
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid,1,Vendor_MSA_Template.pdf,9. Intellectual Property,NONE,contracts,VLH-CON-002,0.666667,573.81
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid,2,Legal_Department_Handbook.pdf,1.1 Teams and Responsibilities,NONE,general,VLH-GEN-001,0.666667,573.81
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid,3,Project_Falcon_Due_Diligence_Memo.pdf,2. Key Due Diligence Findings,MTR-017,contracts,VLH-MTR-017,0.566667,573.81
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid,4,Patent_and_Invention_Disclosure_Process.pdf,Patent Filing and Invention Disclosure Process,NONE,ip,VLH-IP-002,0.366667,573.81
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid,5,Trademark_and_Brand_Protection_Guide.pdf,Trademark and Brand Protection Guide,NONE,ip,VLH-IP-001,0.35,573.81
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid_reranked,1,Vendor_MSA_Template.pdf,9. Intellectual Property,NONE,contracts,VLH-CON-002,0.666667,687.5
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid_reranked,2,Settlement_Authority_Matrix.pdf,2. Special Rules,NONE,litigation,VLH-LIT-003,0.342857,687.5
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid_reranked,3,Trademark_and_Brand_Protection_Guide.pdf,Trademark and Brand Protection Guide,NONE,ip,VLH-IP-001,0.35,687.5
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid_reranked,4,Patent_and_Invention_Disclosure_Process.pdf,Patent Filing and Invention Disclosure Process,NONE,ip,VLH-IP-002,0.366667,687.5
+4,What are the key intellectual property ownership provisions?,gc.sharma,hybrid_reranked,5,Legal_Department_Handbook.pdf,1.1 Teams and Responsibilities,NONE,general,VLH-GEN-001,0.666667,687.5
+5,What happens when a contract is terminated?,gc.sharma,dense,1,Vendor_MSA_Template.pdf,6. Termination,NONE,contracts,VLH-CON-002,0.506377,15.48
+5,What happens when a contract is terminated?,gc.sharma,dense,2,Contract_Review_Playbook.pdf,5. Prohibited Clauses,NONE,contracts,VLH-CON-001,0.470884,15.48
+5,What happens when a contract is terminated?,gc.sharma,dense,3,Document_Retention_Policy.pdf,3. Legal Holds Override,NONE,general,VLH-GEN-003,0.469068,15.48
+5,What happens when a contract is terminated?,gc.sharma,dense,4,Project_Harbor_Investigation_Interim_Report.pdf,3. Actions Taken,MTR-023,compliance,VLH-MTR-023,0.420775,15.48
+5,What happens when a contract is terminated?,gc.sharma,dense,5,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.398385,15.48
+5,What happens when a contract is terminated?,gc.sharma,hybrid,1,Vendor_MSA_Template.pdf,6. Termination,NONE,contracts,VLH-CON-002,0.7,774.09
+5,What happens when a contract is terminated?,gc.sharma,hybrid,2,Project_Falcon_Due_Diligence_Memo.pdf,2. Key Due Diligence Findings,MTR-017,contracts,VLH-MTR-017,0.5,774.09
+5,What happens when a contract is terminated?,gc.sharma,hybrid,3,Contract_Review_Playbook.pdf,5. Prohibited Clauses,NONE,contracts,VLH-CON-001,0.433333,774.09
+5,What happens when a contract is terminated?,gc.sharma,hybrid,4,Meridian_Arbitration_Strategy_Memo.pdf,1. Case Summary,MTR-031,litigation,VLH-MTR-031,0.424242,774.09
+5,What happens when a contract is terminated?,gc.sharma,hybrid,5,Document_Retention_Policy.pdf,2. Retention Schedule,NONE,general,VLH-GEN-003,0.392857,774.09
+5,What happens when a contract is terminated?,gc.sharma,hybrid_reranked,1,Vendor_MSA_Template.pdf,7. Confidentiality,NONE,contracts,VLH-CON-002,0.333333,898.0600000000001
+5,What happens when a contract is terminated?,gc.sharma,hybrid_reranked,2,Vendor_MSA_Template.pdf,6. Termination,NONE,contracts,VLH-CON-002,0.7,898.0600000000001
+5,What happens when a contract is terminated?,gc.sharma,hybrid_reranked,3,Document_Retention_Policy.pdf,2. Retention Schedule,NONE,general,VLH-GEN-003,0.392857,898.0600000000001
+5,What happens when a contract is terminated?,gc.sharma,hybrid_reranked,4,Project_Falcon_Due_Diligence_Memo.pdf,2. Key Due Diligence Findings,MTR-017,contracts,VLH-MTR-017,0.5,898.0600000000001
+5,What happens when a contract is terminated?,gc.sharma,hybrid_reranked,5,Contract_Review_Playbook.pdf,5. Prohibited Clauses,NONE,contracts,VLH-CON-001,0.433333,898.0600000000001

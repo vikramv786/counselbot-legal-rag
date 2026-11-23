@@ -72,15 +72,36 @@ def generate_legal_answer(query: str, context: str) -> str:
     return answer.strip()
 
 
+
 def validate_citations(answer: str, source_count: int) -> bool:
-    """Check that answer citations refer to available source numbers."""
+    """Validate citations while allowing explicit insufficient-context responses."""
 
     citations = re.findall(r"\[(\d+)\]", answer)
 
-    if not citations:
-        return False
+    if citations:
+        return all(
+            1 <= int(citation) <= source_count
+            for citation in citations
+        )
 
-    return all(
-        1 <= int(citation) <= source_count
-        for citation in citations
+    insufficient_context_phrases = (
+        "don't have any information",
+        "cannot determine",
+        "can't determine",
+        "cannot answer",
+        "can't answer",
+        "not enough information",
+        "insufficient information",
+        "no authorized",
+        "not provided in the context",
+        "not available in the provided context",
+    )
+
+    
+    normalized_answer = answer.lower().replace("\u2019", "'").replace("\u2018", "'")
+
+
+    return any(
+        phrase in normalized_answer
+        for phrase in insufficient_context_phrases
     )

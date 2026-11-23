@@ -243,6 +243,16 @@ def classify_sql_question(query: str) -> str | None:
 
     question = query.lower()
 
+
+    # Conceptual legal questions belong to document RAG.
+    if re.match(
+        r"^\s*(what is|what are|define|explain|meaning of|"
+        r"what does|how does|why is)\b",
+        question,
+    ):
+        return None
+
+
     litigation_keywords = (
         "litigation",
         "lawsuit",

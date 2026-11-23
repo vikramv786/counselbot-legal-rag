@@ -75,14 +75,28 @@ def main():
 
         points = []
 
+
         for chunk_index, chunk in enumerate(chunks):
+            headings = chunk.meta.headings or []
+            section_title = headings[-1] if headings else "Untitled section"
+
+            item_labels = [
+                item.label.value
+                for item in (chunk.meta.doc_items or [])
+                if item.label is not None
+            ]
+            chunk_type = item_labels[0] if item_labels else "text"
+
             chunk_record = {
+
                 "chunk_id": f"{document['doc_id']}-{chunk_index}",
                 "doc_id": document["doc_id"],
                 "collection": document["collection"],
                 "matter_id": document["matter_id"],
                 "access_roles": document["access_roles"],
                 "source_document": document["source_document"],
+                "section_title": section_title,
+                "chunk_type": chunk_type,
                 "text": chunk_texts[chunk_index],
             }
 

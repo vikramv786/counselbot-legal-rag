@@ -14,6 +14,17 @@ from counselbot_legal_rag.embeddings import (
 )
 
 
+ROLE_COLLECTIONS = {
+    "general_counsel": [
+        "contracts", "litigation", "ip", "compliance", "general"
+    ],
+    "corporate_counsel": ["contracts", "ip", "general"],
+    "litigation_counsel": ["litigation", "ip", "general"],
+    "compliance_officer": ["compliance", "general"],
+    "paralegal": ["contracts", "general"],
+}
+
+
 def build_access_filter(user: dict) -> models.Filter:
     """Restrict search to documents the user is allowed to access."""
 
@@ -22,9 +33,17 @@ def build_access_filter(user: dict) -> models.Filter:
         match=models.MatchValue(value=user["role"]),
     )
 
+
+    collection_condition = models.FieldCondition(
+        key="collection",
+        match=models.MatchAny(
+            any=ROLE_COLLECTIONS.get(user["role"], [])
+        ),
+    )
+
     if "*" in user["matters"]:
         return models.Filter(
-            must=[role_condition],
+            must=[role_condition, collection_condition],
         )
 
     matter_conditions = [
@@ -45,6 +64,7 @@ def build_access_filter(user: dict) -> models.Filter:
     return models.Filter(
         must=[
             role_condition,
+            collection_condition,
             models.Filter(
                 min_should=models.MinShould(
                     conditions=matter_conditions,
